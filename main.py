@@ -1,4 +1,4 @@
-# Copyright 2017-2020 Abien Fred Agarap
+ # Copyright 2017-2020 Abien Fred Agarap
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ __author__ = "Abien Fred Agarap"
 import argparse
 from model.cnn_softmax import CNN
 from model.cnn_svm import CNNSVM
-from tensorflow.examples.tutorials.mnist import input_data
+import tensorflow_datasets as tfds
 
 
 def parse_args():
@@ -64,9 +64,10 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
 
-    mnist = input_data.read_data_sets(args.dataset, one_hot=True)
-    num_classes = mnist.train.labels.shape[1]
-    sequence_length = mnist.train.images.shape[1]
+    mnist_train, info = tfds.load(args.dataset, split='train', with_info=True)
+    mnist_test = tfds.load(args.dataset, split='test')
+    num_classes = info.features['label'].num_classes
+    sequence_length = info.features['image'].shape[1]
     model_choice = args.model
 
     assert (
@@ -84,8 +85,8 @@ if __name__ == "__main__":
             checkpoint_path=args.checkpoint_path,
             epochs=10000,
             log_path=args.log_path,
-            train_data=mnist.train,
-            test_data=mnist.test,
+            train_data=mnist_train,
+            test_data=mnist_test,
         )
     elif model_choice == "2":
         model = CNNSVM(
@@ -99,6 +100,6 @@ if __name__ == "__main__":
             checkpoint_path=args.checkpoint_path,
             epochs=10000,
             log_path=args.log_path,
-            train_data=mnist.train,
-            test_data=mnist.test,
+            train_data=mnist_train,
+            test_data=mnist_test,
         )
